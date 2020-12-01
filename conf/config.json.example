@@ -1,10 +1,10 @@
 {
   "mode": "config|service",
   "intervalInSecond": 60,
-  "targetFilePath": "target/gen-target.json|/opt/xxx/prometheus/conf/apps-svc-1.json",
+  "targetFilePath": "gen-target.json",
   "dataId": "apps-svc-1.json",
-  "nacosHost": "http://test2:8684/nacos",
-  "namespaceId": "prod",
+  "nacosHost": "http://10.4.9.134:8848/nacos",
+  "namespaceId": "public",
   "group": "DEFAULT_GROUP",
   "cluster": "DEFAULT"
 }

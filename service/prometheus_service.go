@@ -52,18 +52,28 @@ func GeneratePrometheusTarget(config model.Config) {
 
 		hosts := instance.Hosts
 		for j, host := range hosts {
-			hostAddress := host.Ip + ":" + strconv.Itoa(host.Port)
-			log.Println("host["+strconv.Itoa(j)+"] :", hostAddress)
+			// 用元数据信息中的actuator管理端口替换应用服务端口
+			var hostAddress string
 			metadata := host.Metadata
+			if _, ok := metadata["management.port"]; ok {
+				hostAddress = host.Ip + ":" + metadata["management.port"]
+			} else {
+				hostAddress = host.Ip + ":" + strconv.Itoa(host.Port)
+				fmt.Println(host.ServiceName, "服务中元信息没有management.port属性,请检查")
+			}
+			//hostAddress = host.Ip + ":" + strconv.Itoa(host.Port)
+			log.Println("host["+strconv.Itoa(j)+"] :", hostAddress)
 			log.Println(">> metadata :")
-
 			targets = append(targets, hostAddress)
-
 			for key, value := range metadata {
 				log.Println("["+key+"] = ", value)
 				validKey := ReplaceInvalidChar(key)
 				lables[validKey] = value
 			}
+			// 将服务名添加到label中
+			lables["application_name"] = ReplaceInvalidChar(host.ServiceName)
+			// 将服务应用端口添加到label中
+			lables["application_port"] = strconv.Itoa(host.Port)
 		}
 		pt := model.PromTarget{Labels: &lables, Targets: &targets}
 		promJsonTargets = append(promJsonTargets, pt)
@@ -102,8 +112,23 @@ func ReplaceInvalidChar(key string) string {
 	return validKey
 }
 
-func GetServiceNames(nacosHost string, namespaceId string, group string) []string {
+func GetServiceNums(nacosHost, namespaceId, group string) string {
 	serviceUrl := fmt.Sprintf("%s/v1/ns/service/list?pageNo=1&pageSize=10&namespaceId=%s&groupName=%s", nacosHost, namespaceId, group)
+	services, err := httputil.Get(serviceUrl)
+	//fmt.Println("services:", services)
+	if err != nil {
+		log.Println("get service num failed", err)
+	}
+	service := model.ServiceNum{}
+	_ = json.Unmarshal([]byte(services), &service)
+	fmt.Println("service:", service)
+	return strconv.Itoa(service.Count)
+}
+
+func GetServiceNames(nacosHost string, namespaceId string, group string) []string {
+	pageSize := GetServiceNums(nacosHost, namespaceId, group)
+	fmt.Println("pageSize:", pageSize)
+	serviceUrl := fmt.Sprintf("%s/v1/ns/service/list?pageNo=1&pageSize=%s&namespaceId=%s&groupName=%s", nacosHost, pageSize, namespaceId, group)
 	log.Println("=== serviceUrl:", serviceUrl)
 
 	services, serr := httputil.Get(serviceUrl)
@@ -112,7 +137,7 @@ func GetServiceNames(nacosHost string, namespaceId string, group string) []strin
 	}
 
 	service := model.Service{}
-	json.Unmarshal([]byte(services), &service)
+	_ = json.Unmarshal([]byte(services), &service)
 	return service.Doms
 }
 

@@ -6,6 +6,11 @@ type Service struct {
 	Count string   `json:"count"`
 }
 
+type ServiceNum struct {
+	Doms  []string `json:"doms"`
+	Count int      `json:"count"`
+}
+
 //{"hosts":
 //[
 //{"ip":"10.170.0.11","port":9999,"valid":true,"healthy":true,"marked":false,"instanceId":"10.170.0.11#9999#DEFAULT#DEFAULT_GROUP@@ms-gateway",
