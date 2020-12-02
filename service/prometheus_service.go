@@ -74,13 +74,13 @@ func GeneratePrometheusTarget(config model.Config) {
 			// 将服务名添加到label中
 			lables["application"] = host.ServiceName
 			// 将服务应用端口添加到label中
-			lables["application_port"] = strconv.Itoa(host.Port)
+			//lables["application_port"] = strconv.Itoa(host.Port)
 		}
 		pt := model.PromTarget{Labels: &lables, Targets: &targets}
 		promJsonTargets = append(promJsonTargets, pt)
 	}
 
-	targetJson, jsonErr := json.MarshalIndent(promJsonTargets, "", "  ")
+	targetJson, jsonErr := json.MarshalIndent(promJsonTargets, "", "    ")
 	if jsonErr != nil {
 		log.Println("marshal json failed", jsonErr)
 	}
