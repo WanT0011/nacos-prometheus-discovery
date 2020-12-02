@@ -9,6 +9,7 @@ import (
 	"nacos-prometheus-discovery/service"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 )
 
@@ -24,7 +25,6 @@ func init() {
 }
 
 func main() {
-
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, os.Kill)
 
@@ -45,7 +45,10 @@ func main() {
 	json.Unmarshal(configJson, &config)
 
 	// start timer
-	ticker := time.NewTicker(time.Second * time.Duration(config.IntervalInSecond))
+	// 从环境变量中获取配置间隔,单位秒
+	intervalInSecondStr := os.Getenv("INTERVAL_INSECOND")
+	intervalInSecond, _ := strconv.Atoi(intervalInSecondStr)
+	ticker := time.NewTicker(time.Second * time.Duration(intervalInSecond))
 	defer ticker.Stop()
 	done := make(chan bool)
 	go func() {

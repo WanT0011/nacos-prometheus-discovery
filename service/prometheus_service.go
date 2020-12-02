@@ -33,7 +33,8 @@ func FetchPrometheusConfig(config model.Config) {
 }
 
 func GeneratePrometheusTarget(config model.Config) {
-	targetFilePath := config.TargetFilePath
+	//targetFilePath := config.TargetFilePath
+	targetFilePath := os.Getenv("TARGET_FILE_PATH")
 	nacosHost := config.NacosHost
 	namespaceId := config.NamespaceId
 	group := config.Group
