@@ -72,7 +72,7 @@ func GeneratePrometheusTarget(config model.Config) {
 				lables[validKey] = value
 			}
 			// 将服务名添加到label中
-			lables["application"] = ReplaceInvalidChar(host.ServiceName)
+			lables["application"] = host.ServiceName
 			// 将服务应用端口添加到label中
 			lables["application_port"] = strconv.Itoa(host.Port)
 		}
